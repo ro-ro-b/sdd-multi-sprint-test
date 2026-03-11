@@ -1,16 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
+import { noteFixtures } from './fixtures';
 import { CreateNoteInput, Note, UpdateNoteInput } from '../types/note';
 
 const notes = new Map<string, Note>();
-
-const fixtures: CreateNoteInput[] = [
-  { title: 'First Note', content: 'Hello world content' },
-  {
-    title: 'Meeting Notes',
-    content: 'Discussed project timeline and deliverables',
-  },
-  { title: 'Shopping List', content: 'Milk, eggs, bread, butter' },
-];
 
 export const listNotes = (): Note[] => {
   return Array.from(notes.values()).sort(
@@ -64,7 +56,7 @@ export const clearNotes = (): void => {
 export const seedNotes = (): Note[] => {
   clearNotes();
 
-  return fixtures.map((fixture, index) => {
+  return noteFixtures.map((fixture, index) => {
     const createdAt = new Date(Date.now() + index).toISOString();
     const note: Note = {
       id: uuidv4(),

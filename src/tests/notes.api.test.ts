@@ -88,13 +88,16 @@ describe('Notes API', () => {
 
     const response = await request(app)
       .put(`/api/notes/${note.id}`)
-      .send({ title: 'Updated title' });
+      .send({ title: 'Updated', content: 'Updated content' });
 
     expect(response.status).toBe(200);
     expect(response.body.id).toBe(note.id);
-    expect(response.body.title).toBe('Updated title');
-    expect(response.body.content).toBe('Original content');
-    expect(response.body.updatedAt).not.toBe(note.updatedAt);
+    expect(response.body.title).toBe('Updated');
+    expect(response.body.content).toBe('Updated content');
+    expect(response.body.createdAt).toBe(note.createdAt);
+    expect(new Date(response.body.updatedAt).getTime()).toBeGreaterThan(
+      new Date(note.updatedAt).getTime(),
+    );
   });
 
   it('PUT /api/notes/:id returns 400 when no fields are provided', async () => {
@@ -106,16 +109,23 @@ describe('Notes API', () => {
     expect(response.body).toEqual({ error: 'No fields provided' });
   });
 
-  it('PUT /api/notes/:id returns 404 when note does not exist', async () => {
-    const response = await request(app)
-      .put('/api/notes/11111111-1111-4111-8111-111111111111')
-      .send({ title: 'Updated title' });
+  it('PUT /api/notes/:id returns 404 for invalid uuid', async () => {
+    const response = await request(app).put('/api/notes/not-a-uuid').send({ title: 'Updated' });
 
     expect(response.status).toBe(404);
     expect(response.body).toEqual({ error: 'Note not found' });
   });
 
-  it('DELETE /api/notes/:id deletes a note and returns 204', async () => {
+  it('PUT /api/notes/:id returns 404 when note does not exist', async () => {
+    const response = await request(app)
+      .put('/api/notes/11111111-1111-4111-8111-111111111111')
+      .send({ title: 'Updated' });
+
+    expect(response.status).toBe(404);
+    expect(response.body).toEqual({ error: 'Note not found' });
+  });
+
+  it('DELETE /api/notes/:id deletes a note', async () => {
     const note = createNote({ title: 'Delete me', content: 'Delete this note' });
 
     const response = await request(app).delete(`/api/notes/${note.id}`);
