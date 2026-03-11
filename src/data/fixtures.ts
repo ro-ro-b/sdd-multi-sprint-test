@@ -1,10 +1,11 @@
-import { CreateNoteInput } from '../types/note';
+import { CreateNoteInput } from '../types';
 
 export const noteFixtures: CreateNoteInput[] = [
-  { title: 'First Note', content: 'Hello world content' },
+  { title: 'First Note', content: 'Hello world', category: 'personal' },
   {
     title: 'Meeting Notes',
-    content: 'Discussed project timeline and deliverables',
+    content: 'Discussed timeline',
+    category: 'work',
   },
-  { title: 'Shopping List', content: 'Milk, eggs, bread, butter' },
+  { title: 'App Idea', content: 'Build a notes API', category: 'ideas' },
 ];

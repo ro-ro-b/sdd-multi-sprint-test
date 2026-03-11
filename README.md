@@ -49,7 +49,10 @@ npm start
 ## API
 
 ### `GET /api/notes`
-List all notes, newest first.
+List all notes, newest first, with optional category filtering.
+
+Optional query params:
+- `category` — one of `personal`, `work`, `ideas`, `archive`
 
 Response: `200 OK`
 
@@ -97,6 +100,23 @@ Errors:
 - `400 {"error":"Missing or invalid fields"}`
 - `404 {"error":"Note not found"}`
 
+### `PATCH /api/notes/:id/category`
+Update only a note category.
+
+Request body:
+
+```json
+{
+  "category": "work"
+}
+```
+
+Response: `200 OK`
+
+Errors:
+- `400 {"error":"Invalid category"}`
+- `404 {"error":"Note not found"}`
+
 ### `DELETE /api/notes/:id`
 Delete a note.
 
@@ -105,13 +125,30 @@ Response: `204 No Content`
 Error:
 - `404 {"error":"Note not found"}`
 
+### `GET /api/categories`
+List available categories with note counts.
+
+Response: `200 OK`
+
+Example response:
+
+```json
+[
+  { "name": "personal", "count": 1 },
+  { "name": "work", "count": 1 },
+  { "name": "ideas", "count": 1 },
+  { "name": "archive", "count": 0 }
+]
+```
+
 ## Notes
 
 - Notes are stored in memory only.
 - Notes are returned newest first using `createdAt` descending.
 - `id` values are UUIDs.
 - `createdAt` and `updatedAt` are generated automatically.
-- `updatedAt` changes on successful updates.
+- `updatedAt` changes on successful updates, including category-only updates.
+- Valid categories are `personal`, `work`, `ideas`, and `archive`.
 - Invalid route parameter UUIDs are treated as not found.
 - `DELETE` returns `204` with an empty body.
 
@@ -119,6 +156,6 @@ Error:
 
 The integration tests seed these notes:
 
-- `First Note` — `Hello world content`
-- `Meeting Notes` — `Discussed project timeline and deliverables`
-- `Shopping List` — `Milk, eggs, bread, butter`
+- `First Note` — `Hello world` — `personal`
+- `Meeting Notes` — `Discussed timeline` — `work`
+- `App Idea` — `Build a notes API` — `ideas`
