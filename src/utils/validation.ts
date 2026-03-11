@@ -1,0 +1,71 @@
+import { validate as validateUuid } from 'uuid';
+import { CreateNoteInput, UpdateNoteInput } from '../types/note';
+
+const TITLE_MAX_LENGTH = 200;
+const CONTENT_MAX_LENGTH = 5000;
+
+export const isValidUuid = (value: string): boolean => validateUuid(value);
+
+export const isObject = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+};
+
+export const validateCreateNoteInput = (value: unknown): value is CreateNoteInput => {
+  if (!isObject(value)) {
+    return false;
+  }
+
+  const { title, content } = value;
+
+  if (typeof title !== 'string' || typeof content !== 'string') {
+    return false;
+  }
+
+  if (title.length === 0 || content.length === 0) {
+    return false;
+  }
+
+  if (title.length > TITLE_MAX_LENGTH || content.length > CONTENT_MAX_LENGTH) {
+    return false;
+  }
+
+  return true;
+};
+
+export const validateUpdateNoteInput = (
+  value: unknown,
+): { valid: boolean; hasFields: boolean } => {
+  if (!isObject(value)) {
+    return { valid: false, hasFields: false };
+  }
+
+  const allowedKeys: Array<keyof UpdateNoteInput> = ['title', 'content'];
+  const keys = Object.keys(value);
+  const providedKeys = keys.filter((key) => allowedKeys.includes(key as keyof UpdateNoteInput));
+
+  if (providedKeys.length === 0) {
+    return { valid: false, hasFields: false };
+  }
+
+  for (const key of keys) {
+    if (!allowedKeys.includes(key as keyof UpdateNoteInput)) {
+      return { valid: false, hasFields: true };
+    }
+  }
+
+  if ('title' in value) {
+    const title = value.title;
+    if (typeof title !== 'string' || title.length === 0 || title.length > TITLE_MAX_LENGTH) {
+      return { valid: false, hasFields: true };
+    }
+  }
+
+  if ('content' in value) {
+    const content = value.content;
+    if (typeof content !== 'string' || content.length === 0 || content.length > CONTENT_MAX_LENGTH) {
+      return { valid: false, hasFields: true };
+    }
+  }
+
+  return { valid: true, hasFields: true };
+};
