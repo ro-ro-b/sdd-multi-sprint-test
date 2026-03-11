@@ -5,17 +5,50 @@ import {
   getNoteById,
   listNotes,
   updateNote,
+  updateNoteCategory,
 } from '../data/notesStore';
 import {
+  isValidCategory,
   isValidUuid,
   validateCreateNoteInput,
+  validateUpdateCategoryInput,
   validateUpdateNoteInput,
 } from '../utils/validation';
 
 const router = Router();
 
-router.get('/', (_req, res) => {
-  res.status(200).json(listNotes());
+router.get('/', (req, res) => {
+  const { category } = req.query;
+
+  if (typeof category === 'string') {
+    if (!isValidCategory(category)) {
+      return res.status(400).json({ error: 'Invalid category' });
+    }
+
+    return res.status(200).json(listNotes(category));
+  }
+
+  return res.status(200).json(listNotes());
+});
+
+router.patch('/:id/category', (req, res) => {
+  const { id } = req.params;
+
+  if (!isValidUuid(id)) {
+    return res.status(404).json({ error: 'Note not found' });
+  }
+
+  if (!validateUpdateCategoryInput(req.body)) {
+    return res.status(400).json({ error: 'Invalid category' });
+  }
+
+  const note = updateNoteCategory(id, req.body.category);
+
+  if (!note) {
+    return res.status(404).json({ error: 'Note not found' });
+  }
+
+  return res.status(200).json(note);
 });
 
 router.get('/:id', (req, res) => {

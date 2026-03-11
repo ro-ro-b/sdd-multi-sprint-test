@@ -1,8 +1,9 @@
 import { validate as validateUuid } from 'uuid';
-import { CreateNoteInput, UpdateNoteInput } from '../types/note';
+import { categories, CreateNoteInput, UpdateCategoryInput, UpdateNoteInput } from '../types';
 
 const TITLE_MAX_LENGTH = 200;
 const CONTENT_MAX_LENGTH = 5000;
+const CATEGORY_MAX_LENGTH = 50;
 
 export const isValidUuid = (value: string): boolean => validateUuid(value);
 
@@ -10,12 +11,16 @@ export const isObject = (value: unknown): value is Record<string, unknown> => {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 };
 
+export const isValidCategory = (value: string): value is (typeof categories)[number] => {
+  return value.length <= CATEGORY_MAX_LENGTH && categories.includes(value as (typeof categories)[number]);
+};
+
 export const validateCreateNoteInput = (value: unknown): value is CreateNoteInput => {
   if (!isObject(value)) {
     return false;
   }
 
-  const { title, content } = value;
+  const { title, content, category } = value;
 
   if (typeof title !== 'string' || typeof content !== 'string') {
     return false;
@@ -26,6 +31,10 @@ export const validateCreateNoteInput = (value: unknown): value is CreateNoteInpu
   }
 
   if (title.length > TITLE_MAX_LENGTH || content.length > CONTENT_MAX_LENGTH) {
+    return false;
+  }
+
+  if (category !== undefined && (typeof category !== 'string' || !isValidCategory(category))) {
     return false;
   }
 
@@ -68,4 +77,18 @@ export const validateUpdateNoteInput = (
   }
 
   return { valid: true, hasFields: true };
+};
+
+export const validateUpdateCategoryInput = (value: unknown): value is UpdateCategoryInput => {
+  if (!isObject(value)) {
+    return false;
+  }
+
+  const keys = Object.keys(value);
+
+  if (keys.length !== 1 || !('category' in value)) {
+    return false;
+  }
+
+  return typeof value.category === 'string' && isValidCategory(value.category);
 };
